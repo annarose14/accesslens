@@ -1,4 +1,3 @@
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -7,7 +6,6 @@ import base64
 
 app = FastAPI()
 
-# This allows your React frontend to talk to this backend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -15,33 +13,52 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Health check
 @app.get("/health")
 def health():
     return {"status": "ok", "project": "AccessLens"}
 
-# Request model
 class ScanRequest(BaseModel):
     url: str
 
-# Page capture function
 async def capture_page(url: str):
     async with async_playwright() as p:
         browser = await p.chromium.launch()
         page = await browser.new_page(viewport={"width": 1280, "height": 800})
         await page.goto(url, timeout=20000, wait_until="networkidle")
+
+        # inject axe-core into the page
+        await page.add_script_tag(
+            url="https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.7.0/axe.min.js"
+        )
+
+        # run axe-core and get violations
+        violations = await page.evaluate("axe.run().then(r => r.violations)")
+
         screenshot = await page.screenshot(full_page=False)
         html = await page.content()
         await browser.close()
-        return screenshot, html
+        return screenshot, html, violations
 
-# Scan endpoint
 @app.post("/scan")
 async def scan(req: ScanRequest):
-    screenshot, html = await capture_page(req.url)
+    screenshot, html, violations = await capture_page(req.url)
     img_base64 = base64.b64encode(screenshot).decode("utf-8")
+
+    # simplify violations to only what we need
+    simplified = []
+    for v in violations:
+        simplified.append({
+            "id": v["id"],
+            "impact": v["impact"],
+            "description": v["description"],
+            "help": v["help"],
+            "helpUrl": v["helpUrl"],
+            "nodes_affected": len(v["nodes"])
+        })
+
     return {
         "screenshot": img_base64,
-        "html_length": len(html),
-        "url": req.url
+        "url": req.url,
+        "violation_count": len(simplified),
+        "violations": simplified
     }
