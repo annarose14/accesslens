@@ -5,6 +5,7 @@
 **Status: 🚧 In progress — actively building**
 
 ---
+![AccessLens scanning Woolworths](Screenshot.png)
 
 ## What it does
 
