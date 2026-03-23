@@ -23,21 +23,20 @@ class ScanRequest(BaseModel):
 async def capture_page(url: str):
     async with async_playwright() as p:
         browser = await p.chromium.launch()
-        page = await browser.new_page(viewport={"width": 1280, "height": 800})
+        page = await browser.new_page(
+            viewport={"width": 1280, "height": 800},
+            user_agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        )
         await page.goto(url, timeout=20000, wait_until="networkidle")
-
-        # inject axe-core into the page
         await page.add_script_tag(
             url="https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.7.0/axe.min.js"
         )
-
-        # run axe-core and get violations
         violations = await page.evaluate("axe.run().then(r => r.violations)")
-
         screenshot = await page.screenshot(full_page=False)
         html = await page.content()
         await browser.close()
         return screenshot, html, violations
+
 
 @app.post("/scan")
 async def scan(req: ScanRequest):
