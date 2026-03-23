@@ -4,8 +4,9 @@
 
 **Status: 🚧 In progress — actively building**
 
----
 ![AccessLens scanning Woolworths](https://raw.githubusercontent.com/annarose14/accesslens/main/Screenshot.png)
+
+---
 
 ## What it does
 
@@ -18,7 +19,8 @@ Most websites unintentionally block users with disabilities. AccessLens scans an
 ## Features (building in public)
 
 - [x] Page capture — screenshot + DOM extraction via Playwright
-- [ ] Accessibility rule engine — axe-core WCAG 2.1 checker
+- [x] Accessibility rule engine — axe-core WCAG 2.1 checker
+- [x] React dashboard — screenshot display + colour-coded violations
 - [ ] AI fix suggestions — Claude API generates plain-English explanations + code diffs
 - [ ] Visual heatmap — severity overlay on the page screenshot
 - [ ] Score dashboard — WCAG A / AA / AAA compliance score
@@ -32,7 +34,6 @@ Most websites unintentionally block users with disabilities. AccessLens scans an
 | Backend | Python, FastAPI, Playwright |
 | Accessibility engine | axe-core (Deque) |
 | AI layer | Claude API (Anthropic) |
-| Computer vision | OpenCV |
 | Frontend | React, TypeScript, Tailwind CSS |
 | Deployment | Docker, Railway, Vercel |
 
@@ -66,18 +67,4 @@ Over 96% of the world's top websites fail basic accessibility standards. Existin
 
 ---
 
-## Project structure
-```
-accesslens/
-├── backend/
-│   ├── main.py          # FastAPI app + scan endpoint
-│   └── requirements.txt
-├── frontend/
-│   └── src/
-│       └── App.tsx      # React UI
-└── README.md
-```
-
----
-
-*Built by Anna | MIT student at UNSW Sydney | Portfolio project*
+*Built by Anna Rose | MIT student at UNSW Sydney | Portfolio project*
