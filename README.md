@@ -4,7 +4,7 @@
 
 **Status: 🚧 In progress — actively building**
 
-![AccessLens scanning Woolworths](https://raw.githubusercontent.com/annarose14/accesslens/main/Screenshot.png)
+![AccessLens demo](https://raw.githubusercontent.com/annarose14/accesslens/main/demo.png)
 
 ---
 
