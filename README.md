@@ -5,7 +5,7 @@
 **Status: 🚧 In progress — actively building**
 
 ---
-![AccessLens scanning Woolworths](Screenshot.png)
+![AccessLens scanning Woolworths](https://raw.githubusercontent.com/annarose14/accesslens/main/Screenshot.png)
 
 ## What it does
 
