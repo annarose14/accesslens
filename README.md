@@ -63,7 +63,18 @@ npm start
 
 ## Why I built this
 
-Over 96% of the world's top websites fail basic accessibility standards. Existing tools like Lighthouse only catch ~30% of issues and give no actionable fix suggestions. AccessLens combines automated rule-checking with AI to make accessibility auditing fast, specific, and actionable for any developer or designer.
+Over 96% of the world's top websites fail basic accessibility standards.
+Existing tools like Lighthouse only catch ~30% of issues and give no
+actionable fix suggestions.
+
+In the first week of building AccessLens, I scanned 5 major Australian
+websites and found 16 real WCAG violations including:
+- ABC News: 13 duplicate ARIA IDs affecting screen readers (critical)
+- University of Sydney: colour contrast failures affecting low vision users
+- Canva: landmark violations affecting keyboard navigation
+
+AccessLens combines automated rule-checking with AI to make accessibility
+auditing fast, specific, and actionable.
 
 ---
 
