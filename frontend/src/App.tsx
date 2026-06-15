@@ -8,6 +8,9 @@ interface Violation {
   help: string;
   helpUrl: string;
   nodes_affected: number;
+  explanation: string;
+  before: string;
+  after: string;
 }
 
 interface ScanResult {
@@ -29,12 +32,14 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [result, setResult]   = useState<ScanResult | null>(null);
   const [error, setError]     = useState("");
+  const [expanded, setExpanded] = useState<number | null>(null);
 
   async function handleScan() {
     if (!url) return;
     setLoading(true);
     setError("");
     setResult(null);
+    setExpanded(null);
     try {
       const res = await axios.post("http://localhost:8000/scan", { url });
       setResult(res.data);
@@ -67,7 +72,7 @@ export default function App() {
             Scan any website for accessibility violations
           </h2>
           <p className="text-sm text-gray-500 mb-4">
-            Paste a URL below — AccessLens will check it against WCAG 2.1 standards.
+            Paste a URL — AccessLens checks it against WCAG 2.1 and generates AI fix suggestions.
           </p>
           <div className="flex gap-3">
             <input
@@ -89,12 +94,12 @@ export default function App() {
           {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
         </div>
 
-        {/* Loading state */}
+        {/* Loading */}
         {loading && (
           <div className="text-center py-16 text-gray-500">
             <div className="text-4xl mb-4">⏳</div>
             <p className="text-lg font-medium">Scanning {url}...</p>
-            <p className="text-sm mt-1">This takes about 10 seconds</p>
+            <p className="text-sm mt-1">Takes about 15 seconds — AI is generating fix suggestions</p>
           </div>
         )}
 
@@ -102,7 +107,7 @@ export default function App() {
         {result && !loading && (
           <div>
 
-            {/* Summary bar */}
+            {/* Summary */}
             <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6 flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-500 mb-1">Scanned</p>
@@ -116,60 +121,91 @@ export default function App() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-              {/* Screenshot */}
-              <div className="bg-white rounded-xl border border-gray-200 p-4">
-                <h3 className="text-sm font-medium text-gray-700 mb-3">Page screenshot</h3>
-                <img
-                  src={`data:image/png;base64,${result.screenshot}`}
-                  alt="Screenshot of scanned page"
-                  className="w-full rounded-lg border border-gray-100"
-                />
-              </div>
-
-              {/* Violations list */}
-              <div className="bg-white rounded-xl border border-gray-200 p-4">
-                <h3 className="text-sm font-medium text-gray-700 mb-3">
-                  Violations ({result.violation_count})
-                </h3>
-                {result.violations.length === 0 ? (
-                  <div className="text-center py-8">
-                    <p className="text-2xl mb-2">✅</p>
-                    <p className="text-sm text-gray-500">No violations found!</p>
-                  </div>
-                ) : (
-                  <div className="space-y-3 max-h-96 overflow-y-auto">
-                    {result.violations.map((v, i) => (
-                      <div
-                        key={i}
-                        className={`rounded-lg border p-3 ${impactColor[v.impact] || "bg-gray-100 text-gray-800 border-gray-200"}`}
-                      >
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="text-xs font-semibold uppercase tracking-wide">
-                            {v.impact}
-                          </span>
-                          <span className="text-xs">
-                            {v.nodes_affected} element{v.nodes_affected !== 1 ? "s" : ""}
-                          </span>
-                        </div>
-                        <p className="text-sm font-medium">{v.help}</p>
-                        <p className="text-xs mt-1 opacity-80">{v.description}</p>
-                        <a
-                          href={v.helpUrl}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="text-xs underline mt-1 inline-block opacity-70 hover:opacity-100"
-                        >
-                          Learn more
-                        </a>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
+            {/* Screenshot */}
+            <div className="bg-white rounded-xl border border-gray-200 p-4 mb-6">
+              <h3 className="text-sm font-medium text-gray-700 mb-3">Page screenshot</h3>
+              <img
+                src={`data:image/png;base64,${result.screenshot}`}
+                alt="Screenshot of scanned page"
+                className="w-full rounded-lg border border-gray-100"
+              />
             </div>
+
+            {/* Violations */}
+            <div className="bg-white rounded-xl border border-gray-200 p-4">
+              <h3 className="text-sm font-medium text-gray-700 mb-3">
+                Violations with AI fix suggestions ({result.violation_count})
+              </h3>
+              {result.violations.length === 0 ? (
+                <div className="text-center py-8">
+                  <p className="text-2xl mb-2">✅</p>
+                  <p className="text-sm text-gray-500">No violations found!</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {result.violations.map((v, i) => (
+                    <div
+                      key={i}
+                      className={`rounded-lg border p-3 ${impactColor[v.impact] || "bg-gray-100 text-gray-800 border-gray-200"}`}
+                    >
+                      {/* Violation header */}
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs font-semibold uppercase tracking-wide">
+                          {v.impact}
+                        </span>
+                        <span className="text-xs">
+                          {v.nodes_affected} element{v.nodes_affected !== 1 ? "s" : ""}
+                        </span>
+                      </div>
+                      <p className="text-sm font-medium">{v.help}</p>
+                      <p className="text-xs mt-1 opacity-80">{v.description}</p>
+
+                      {/* AI explanation */}
+                      {v.explanation && v.explanation !== "AI fix unavailable." && (
+                        <div className="mt-2 bg-white bg-opacity-60 rounded p-2">
+                          <p className="text-xs font-semibold mb-1">Why it matters</p>
+                          <p className="text-xs">{v.explanation}</p>
+                        </div>
+                      )}
+
+                      {/* Toggle code fix */}
+                      {v.before && v.before !== "No example available." && (
+                        <button
+                          onClick={() => setExpanded(expanded === i ? null : i)}
+                          className="text-xs underline mt-2 inline-block opacity-70 hover:opacity-100"
+                        >
+                          {expanded === i ? "Hide fix" : "Show code fix"}
+                        </button>
+                      )}
+
+                      {/* Code fix */}
+                      {expanded === i && (
+                        <div className="mt-2 space-y-1">
+                          <div>
+                            <p className="text-xs font-semibold mb-1">Before (broken)</p>
+                            <pre className="text-xs bg-red-50 border border-red-200 rounded p-2 overflow-x-auto whitespace-pre-wrap">{v.before}</pre>
+                          </div>
+                          <div>
+                            <p className="text-xs font-semibold mb-1">After (fixed)</p>
+                            <pre className="text-xs bg-green-50 border border-green-200 rounded p-2 overflow-x-auto whitespace-pre-wrap">{v.after}</pre>
+                          </div>
+                        </div>
+                      )}
+
+                      <a
+                        href={v.helpUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-xs underline mt-2 inline-block opacity-70 hover:opacity-100 ml-3"
+                      >
+                        WCAG docs
+                      </a>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
           </div>
         )}
 
