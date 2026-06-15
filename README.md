@@ -142,4 +142,4 @@ Existing tools like Lighthouse catch only ~30% of accessibility issues and give 
 ---
 
 *Built by Anna Rose | MIT student, UNSW Sydney*
-*Targeting roles in AI/ML engineering and UX at Google, Canva, Atlassian, Microsoft*
+*Targeting roles in AI/ML engineering 
