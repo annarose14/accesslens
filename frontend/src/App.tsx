@@ -41,7 +41,7 @@ export default function App() {
     setResult(null);
     setExpanded(null);
     try {
-      const res = await axios.post("https://YOUR-RAILWAY-URL/scan", { url });
+      const res = await axios.post("https://accesslens-production-3af6.up.railway.app/scan", { url });
       setResult(res.data);
     } catch {
       setError("Scan failed. Make sure the URL is correct and the backend is running.");
