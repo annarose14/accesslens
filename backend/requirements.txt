@@ -1,5 +1,6 @@
 fastapi
 uvicorn
-playwright
+playwright==1.63.0
 python-dotenv
 groq
+google-genai
