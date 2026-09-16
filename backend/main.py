@@ -41,7 +41,7 @@ AFTER: [one line of fixed HTML code example]"""
 
     try:
         response = groq_client.chat.completions.create(
-            model="llama3-70b-8192",
+            model="llama-3.1-8b-instant",
             messages=[{"role": "user", "content": prompt}],
             max_tokens=200,
             temperature=0.3
