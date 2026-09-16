@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 
 interface Violation {
@@ -34,6 +34,10 @@ export default function App() {
   const [error, setError]     = useState("");
   const [expanded, setExpanded] = useState<number | null>(null);
 
+  useEffect(() => {
+    fetch("https://accesslens-backend-t4m6.onrender.com/health").catch(() => {});
+  }, []);
+
   async function handleScan() {
     if (!url) return;
     setLoading(true);
@@ -41,7 +45,7 @@ export default function App() {
     setResult(null);
     setExpanded(null);
     try {
-      const res = await axios.post("https://accesslens-production-3af6.up.railway.app/scan", { url });
+      const res = await axios.post("https://accesslens-backend-t4m6.onrender.com/scan", { url });
       setResult(res.data);
     } catch {
       setError("Scan failed. Make sure the URL is correct and the backend is running.");
@@ -99,7 +103,7 @@ export default function App() {
           <div className="text-center py-16 text-gray-500">
             <div className="text-4xl mb-4">⏳</div>
             <p className="text-lg font-medium">Scanning {url}...</p>
-            <p className="text-sm mt-1">Takes about 15 seconds — AI is generating fix suggestions</p>
+            <p className="text-sm mt-1">Takes about 15–60 seconds on first scan — waking up the server</p>
           </div>
         )}
 
@@ -148,7 +152,6 @@ export default function App() {
                       key={i}
                       className={`rounded-lg border p-3 ${impactColor[v.impact] || "bg-gray-100 text-gray-800 border-gray-200"}`}
                     >
-                      {/* Violation header */}
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-xs font-semibold uppercase tracking-wide">
                           {v.impact}
@@ -160,7 +163,6 @@ export default function App() {
                       <p className="text-sm font-medium">{v.help}</p>
                       <p className="text-xs mt-1 opacity-80">{v.description}</p>
 
-                      {/* AI explanation */}
                       {v.explanation && v.explanation !== "AI fix unavailable." && (
                         <div className="mt-2 bg-white bg-opacity-60 rounded p-2">
                           <p className="text-xs font-semibold mb-1">Why it matters</p>
@@ -168,7 +170,6 @@ export default function App() {
                         </div>
                       )}
 
-                      {/* Toggle code fix */}
                       {v.before && v.before !== "No example available." && (
                         <button
                           onClick={() => setExpanded(expanded === i ? null : i)}
@@ -178,7 +179,6 @@ export default function App() {
                         </button>
                       )}
 
-                      {/* Code fix */}
                       {expanded === i && (
                         <div className="mt-2 space-y-1">
                           <div>
