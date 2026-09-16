@@ -123,4 +123,4 @@ async def scan(req: ScanRequest):
         "url": req.url,
         "violation_count": len(simplified),
         "violations": simplified
-    }
+    }# force redeploy
