@@ -41,7 +41,7 @@ AFTER: [one line of fixed HTML code example]"""
 
     try:
         response = groq_client.chat.completions.create(
-            model="llama-3.1-8b-instant",
+            model="openai/gpt-oss-20b",
             messages=[{"role": "user", "content": prompt}],
             max_tokens=200,
             temperature=0.3
